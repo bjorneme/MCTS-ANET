@@ -3,7 +3,7 @@ import numpy as np
 
 from games.DisjointSet import DisjointSet
 
-# Hex class
+# Class contining the logic for Hex
 class Hex:
     def __init__(self, board_size):
         # Initialize the board and starting player
