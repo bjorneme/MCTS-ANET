@@ -26,10 +26,10 @@ class ANET(nn.Module):
 
         return policy, value
     
-    def prepare_anet_input(self, batch_of_board_states, players):
-        new_batch_of_board_states = []
+    def prepare_input(self, batch_states, players):
+        new_batch_states = []
 
-        for board_state, player in zip(batch_of_board_states, players):
+        for board_state, player in zip(batch_states, players):
             # Matrix 1: Positions occupied by Player 1
             player_1 = [[1 if cell == 1 else 0 for cell in row] for row in board_state]
 
@@ -41,9 +41,9 @@ class ANET(nn.Module):
 
             # Combine all states of a sample into a single list, flatten the list
             flattened_list = [cell for submatrix in [player_1, player_2, current_turn] for row in submatrix for cell in row]
-            new_batch_of_board_states.append(flattened_list)
+            new_batch_states.append(flattened_list)
 
             # TODO: Change here for CNN
 
         # Return the prepared batch
-        return torch.Tensor(new_batch_of_board_states)
+        return torch.Tensor(new_batch_states)

@@ -47,6 +47,11 @@ class TicTacToe:
         # Return all valid moves
         return valid_moves
     
+    def get_valid_moves_hot_encoded(self):
+        # Return one hot encoded valid moves
+        return [1 if cell == 0 else 0 for row in self.board for cell in row]
+
+    
     def check_win(self):
         # Check rows, columns, and diagonals for a win
         for i in range(self.board_size):
