@@ -63,9 +63,10 @@ class MCTSNode:
 
 # MCTS: the monte carlo tree
 class MCTS:
-    def __init__(self, root, board_size):
+    def __init__(self, root, board_size, total_actions):
         self.root = root # The root
         self.board_size = board_size # Board size
+        self.total_actions = total_actions # Total actions
 
     def tree_search(self, node):
         # Search until node with untried moves is found
@@ -102,14 +103,21 @@ class MCTS:
     
     def get_action_probabilities(self):
         # Calculate action probabilities for each move
-        action_probs = np.zeros((self.board_size,self.board_size))
+        action_probs = np.zeros(self.total_actions)
         total_visits = sum(child.visits for child in self.root.children)
         for child in self.root.children:
-            action_probs[child.move[0]][child.move[1]] = child.visits/ total_visits
+            action_probs[self.pos_to_index(child.move)] = child.visits/ total_visits
         return action_probs
-                  
-state_manager = TicTacToe()
-state_manager.current_player = -1
-node = MCTSNode(1.41, state_manager)
-mcts = MCTS(node, 3)
-print(mcts.run_simulation(10000))
+    
+    def update_root(self, best_action):
+        # Update MCTS root to the new state, and prune
+        for child in self.root.children:
+            if self.pos_to_index(child.move) == best_action:
+                self.root = child
+                self.root.parent = None
+
+    def pos_to_index(self, pos):
+        # If pos is represented as 2D board. Return index in 1D format
+        if isinstance(pos, (list, tuple)) and len(pos) == 2:
+            return pos[0] * self.board_size + pos[1]
+        return pos

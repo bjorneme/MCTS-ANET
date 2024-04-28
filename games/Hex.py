@@ -24,7 +24,13 @@ class Hex:
         return row*self.board_size + col
     
     def make_move(self, move):
-        row, col = move
+        if isinstance(move, (list, tuple)) and len(move) == 2:
+            row, col = move
+        else:
+            # Calculate coordinates
+            row = move // self.board_size
+            col = move % self.board_size
+            
         index = self.pos_to_index(row, col)
 
         # Check is the move is valid
