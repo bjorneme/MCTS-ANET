@@ -11,11 +11,20 @@ from games.TicTacToe import TicTacToe
 
 
 class MCTSSystem:
-    def __init__(self,anet):
+    def __init__(self,anet, model_path = None, optimizer_path = None):
         self.replay_buffer = ReplayBuffer()
         self.anet = anet
         self.num_games = 100
         self.batch_size = 64
+        self.save_interval = 10
+        self.optimizer = optim.Adam(anet.parameters(), lr=0.001)
+
+        # Load model and optimizer if paths are provided
+        self.model_path = model_path
+        self.optimizer_path = optimizer_path
+        if model_path is not None and optimizer_path is not None:
+            self.load_model()
+
 
     def self_play(self, episode):
 
@@ -71,13 +80,15 @@ class MCTSSystem:
             if len(self.replay_buffer.buffer) > 100:
                 self.train()
 
+            # Step 3: Save the model
+            if ga % self.save_interval == 0:
+                self.save_model(ga)
+
         # Print final results
         print("Final Results:")
         print(f"Wins: {self.win}, Draws: {self.draw}, Losses: {self.loss}")
 
-    def train(self):
-        optimizer = optim.Adam(anet.parameters(), lr=0.001)
-        
+    def train(self):        
         # Set model to training mode
         anet.train()
 
@@ -95,10 +106,29 @@ class MCTSSystem:
 
         # Backward pass and optimize
         loss.backward()
-        optimizer.step()
+        self.optimizer.step()
 
         # Print loss
         print(f"Loss: {loss}")
+
+
+    def save_model(self, model_index):
+        # Save the model.
+        model_filename = f"model_{model_index}.pth"
+        optimizer_filename = f"optimizer_{model_index}.pth"
+        
+        torch.save(self.anet.state_dict(), model_filename)
+        torch.save(self.optimizer.state_dict(), optimizer_filename)
+        print(f"Model and optimizer saved: {model_filename}, {optimizer_filename}")
+
+    def load_model(self):
+        # Load existing model.
+        try:
+            self.anet.load_state_dict(torch.load(self.model_path))
+            self.optimizer.load_state_dict(torch.load(self.optimizer_path))
+            print("Model and optimizer have been successfully loaded.")
+        except FileNotFoundError:
+            print("No model and optimizer found. Creating a new one.")
 
 
 
