@@ -7,19 +7,29 @@ class ANET(nn.Module):
     def __init__(self):
         super(ANET, self).__init__()
 
-        # layers
+        # Common layers
         self.fc1 = nn.Linear(27, 64)
-        self.fc2 = nn.Linear(64, 9)
+        self.fc2 = nn.Linear(64, 64)
+
+        # Policy head
+        self.policy_head = nn.Linear(64, 9)
+
+        # Value head
+        self.value_head = nn.Linear(64, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
-    
-    def prepare_anet_input(self, batch_of_board_states, players):
-        new_batch_of_board_states = []
+        x = F.relu(self.fc2(x))
 
-        for board_state, player in zip(batch_of_board_states, players):
+        policy = F.softmax(self.policy_head(x), dim=1)
+        value = torch.tanh(self.value_head(x))
+
+        return policy, value
+    
+    def prepare_input(self, batch_states, players):
+        new_batch_states = []
+
+        for board_state, player in zip(batch_states, players):
             # Matrix 1: Positions occupied by Player 1
             player_1 = [[1 if cell == 1 else 0 for cell in row] for row in board_state]
 
@@ -31,9 +41,9 @@ class ANET(nn.Module):
 
             # Combine all states of a sample into a single list, flatten the list
             flattened_list = [cell for submatrix in [player_1, player_2, current_turn] for row in submatrix for cell in row]
-            new_batch_of_board_states.append(flattened_list)
+            new_batch_states.append(flattened_list)
 
             # TODO: Change here for CNN
 
         # Return the prepared batch
-        return torch.Tensor(new_batch_of_board_states)
+        return torch.Tensor(new_batch_states)
