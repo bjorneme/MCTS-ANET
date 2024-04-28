@@ -14,7 +14,7 @@ class MCTSSystem:
     def __init__(self,anet):
         self.replay_buffer = ReplayBuffer()
         self.anet = anet
-        self.num_games = 25
+        self.num_games = 100
         self.batch_size = 64
 
     def self_play(self, episode):

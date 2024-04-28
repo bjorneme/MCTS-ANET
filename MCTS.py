@@ -2,6 +2,7 @@ import math
 import random
 
 import numpy as np
+import torch.nn.functional as F
 import torch
 from games.Hex import Hex
 from games.TicTacToe import TicTacToe
@@ -79,7 +80,7 @@ class MCTSNode:
         with torch.no_grad():
             predicted_probs = self.anet(input)
         valid_moves = state.get_valid_moves_hot_encoded()
-        predicted_probs = predicted_probs * torch.Tensor(valid_moves)
+        predicted_probs = F.softmax(predicted_probs, dim=1) * torch.Tensor(valid_moves)
         return np.argmax(predicted_probs.detach().numpy())
 
 
