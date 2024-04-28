@@ -30,7 +30,7 @@ class MCTSSystem:
 
         # Initialize the game and MCTS
         state_manager = TicTacToe()
-        root_node = MCTSNode(self.anet, 1.41, state_manager)
+        root_node = MCTSNode(1.41, state_manager)
         mcts = MCTS(root_node, 3, 9)
 
         # Alternate the starting player
@@ -41,13 +41,11 @@ class MCTSSystem:
         while not state_manager.is_game_over():
 
             # Execute the MCTS search. Get probabilities for possible actions
-            action_probs = mcts.run_simulation(2500)
+            action_probs = mcts.run_simulation(1500)
             board_state = copy.deepcopy(state_manager.board)
 
             # Select the best action based on the action probabilities
             best_action = np.argmax(action_probs)
-
-            print(best_action)
 
             # Save to a buffer, before loading into replay buffer
             self.replay_buffer.push_to_buffer(board_state, action_probs, state_manager.current_player)
@@ -96,7 +94,7 @@ class MCTSSystem:
         board_states, action_probs, players = self.replay_buffer.get_sample(self.batch_size)
 
         # Prepare board state
-        input_state_anet = self.anet.prepare_input(board_states, players)
+        input_state_anet = self.anet.prepare_anet_input(board_states, players)
 
         # Forward pass
         predicted_probs = self.anet(input_state_anet)

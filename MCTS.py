@@ -4,12 +4,10 @@ import random
 import numpy as np
 import torch.nn.functional as F
 import torch
-from games.Hex import Hex
-from games.TicTacToe import TicTacToe
 
 # MCTSNode: node in the tree
 class MCTSNode:
-    def __init__(self, anet, c, current_state, move=None, parent=None):
+    def __init__(self, c, current_state, move=None, parent=None):
         self.current_state = current_state # State of the game at this node
         self.move = move # Move that led to this node
         self.parent = parent # Parent to this node
@@ -17,9 +15,7 @@ class MCTSNode:
         self.visits = 0 # Number of times this node was visited during search
         self.value = 0.0 # Estimate how god this node is
         self.untried_moves = current_state.get_valid_moves() # Moves available and not tried in from this state
-        self.anet = anet # Actor Network
         self.c = c # Exploration constant
-        self.e_greedy = 0.3 # Chance of taking random action under rollout
 
     def select_best_child(self):
         # Player 1 is maximizing
@@ -37,7 +33,7 @@ class MCTSNode:
             self.untried_moves.remove(move)
             new_state = self.current_state.copy()
             new_state.make_move(move)
-            new_child_node = MCTSNode(self.anet, self.c,new_state,move, self)
+            new_child_node = MCTSNode(self.c,new_state,move, self)
             self.children.append(new_child_node)
             return new_child_node
 
@@ -46,17 +42,8 @@ class MCTSNode:
 
         # Simulate until the game reaches a end state
         while not simulation_state.is_game_over():
-
-            # 30 % chance for taking a random action
-            if random.random() < 0.3:
-                possible_moves = simulation_state.get_valid_moves()
-                move = random.choice(possible_moves)
-
-            # Use ANET to select action
-            else:
-                move = self.select_anet_move(simulation_state)
-            
-            # Execute the move
+            possible_moves = simulation_state.get_valid_moves()
+            move = random.choice(possible_moves)
             simulation_state.make_move(move)
             
         # Return the evaluation of the end state
@@ -78,7 +65,7 @@ class MCTSNode:
         # Use the anet to select the most promising move
         input = self.anet.prepare_input([state.board], [state.current_player])
         with torch.no_grad():
-            predicted_probs = self.anet(input)
+            predicted_probs, _ = self.anet(input)
         valid_moves = state.get_valid_moves_hot_encoded()
         predicted_probs = F.softmax(predicted_probs, dim=1) * torch.Tensor(valid_moves)
         return np.argmax(predicted_probs.detach().numpy())
