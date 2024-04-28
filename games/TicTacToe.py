@@ -58,10 +58,8 @@ class TicTacToe:
         return 0
     
     def is_game_over(self):
-        # The game is over of there is no winner or no valid moves
-        if self.check_win() != 0 or not self.get_valid_moves():
-            return True
-        return False
+        return self.check_win() != 0 or not self.get_valid_moves()
+
     
     def display_board(self):
         # Print the board state
@@ -78,16 +76,12 @@ class TicTacToe:
         new_game.current_player = self.current_player
         return new_game
     
-    def evaluate_win_loss_for_player(self, player):
-        # Evaluate if the specified player has won or lost
+    def get_winner(self):
         if self.is_game_over():
-
-            # Return 1 if player has won
-            if self.check_win() == player:
+            # If player 1 wins. Return 1
+            if self.check_win() == 1:
                 return 1
-            
-            # Return -1 if player has lost
-            elif self.check_win() == -player:
+            # If player -1 wins. Return -1
+            if self.check_win() == -1:
                 return -1
-        
-        return 0
+            return 0

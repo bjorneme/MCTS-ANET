@@ -135,14 +135,12 @@ class Hex:
         new_game.disjointset = copy.deepcopy(self.disjointset)
         return new_game
     
-    def evaluate_win_loss_for_player(self, player):
-        # Evaluate if the specified player has won or lost
+    def get_winner(self):
         if self.is_game_over():
-
-            # Return 1 if player has won
-            if self.check_win() == player:
+            # If player 1 wins. Return 1
+            if self.check_win() == 1:
                 return 1
-            
-            # Return -1 if player has lost
-            elif self.check_win() == -player:
+            # If player -1 wins. Return -1
+            if self.check_win() == -1:
                 return -1
+            return 0
