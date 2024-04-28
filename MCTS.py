@@ -77,7 +77,7 @@ class MCTSNode:
         # Use the anet to select the most promising move
         input = self.anet.prepare_input([state.board], [state.current_player])
         with torch.no_grad():
-            predicted_probs, _ = self.anet(input)
+            predicted_probs = self.anet(input)
         valid_moves = state.get_valid_moves_hot_encoded()
         predicted_probs = predicted_probs * torch.Tensor(valid_moves)
         return np.argmax(predicted_probs.detach().numpy())

@@ -15,7 +15,7 @@ class MCTSSystem:
         self.replay_buffer = ReplayBuffer()
         self.anet = anet
         self.num_games = 25
-        self.batch_size = 32
+        self.batch_size = 64
 
     def self_play(self, episode):
 
@@ -27,8 +27,6 @@ class MCTSSystem:
         # Alternate the starting player
         if(episode % 2 == 0):
             state_manager.current_player = -1
-
-        buffer = []
 
         # Play until game is over
         while not state_manager.is_game_over():
@@ -43,7 +41,7 @@ class MCTSSystem:
             print(best_action)
 
             # Save to a buffer, before loading into replay buffer
-            buffer.append((board_state, action_probs, state_manager.current_player))
+            self.replay_buffer.push_to_buffer(board_state, action_probs, state_manager.current_player)
 
             # Execute the best action
             state_manager.make_move(best_action)
@@ -61,10 +59,6 @@ class MCTSSystem:
             self.loss += 1
         print(f"Episode {episode}")
 
-        # Append game to replay buffer
-        for board_state, action_probs, player in buffer:
-            self.replay_buffer.push_to_buffer(board_state, action_probs, [result], player)
-
     def run_system(self):
         # For counting win/ draw/ loss
         self.win, self.draw, self.loss = 0, 0, 0
@@ -74,7 +68,7 @@ class MCTSSystem:
             self.self_play(ga)
 
             # Step 2: Train ANET on random minibatches of cases from Replay buffer
-            if len(self.replay_buffer.buffer) > 50:
+            if len(self.replay_buffer.buffer) > 100:
                 self.train()
 
         # Print final results
@@ -88,18 +82,16 @@ class MCTSSystem:
         anet.train()
 
         # Sample a batch from Replay Buffer
-        board_states, action_probs, values, players = self.replay_buffer.get_sample(self.batch_size)
+        board_states, action_probs, players = self.replay_buffer.get_sample(self.batch_size)
 
         # Prepare board state
         input_state_anet = self.anet.prepare_input(board_states, players)
 
         # Forward pass
-        predicted_probs, predicted_values = self.anet(input_state_anet)
+        predicted_probs = self.anet(input_state_anet)
 
         # Calculate loss
-        value_loss = F.mse_loss(predicted_values, torch.Tensor(values))
-        policy_loss = F.cross_entropy(predicted_probs, torch.Tensor(action_probs))
-        loss = policy_loss + value_loss
+        loss = F.cross_entropy(predicted_probs, torch.Tensor(action_probs))
 
         # Backward pass and optimize
         loss.backward()

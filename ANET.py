@@ -7,24 +7,14 @@ class ANET(nn.Module):
     def __init__(self):
         super(ANET, self).__init__()
 
-        # Common layers
+        # layers
         self.fc1 = nn.Linear(27, 64)
-        self.fc2 = nn.Linear(64, 64)
-
-        # Policy head
-        self.policy_head = nn.Linear(64, 9)
-
-        # Value head
-        self.value_head = nn.Linear(64, 1)
+        self.fc2 = nn.Linear(64, 9)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-
-        policy = F.softmax(self.policy_head(x), dim=1)
-        value = torch.tanh(self.value_head(x))
-
-        return policy, value
+        x = F.softmax(self.fc2(x), dim=1)
+        return x
     
     def prepare_input(self, batch_states, players):
         new_batch_states = []
