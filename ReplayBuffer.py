@@ -1,6 +1,11 @@
 
 
 # Replaybuffer: store samples from self play
+import random
+
+import torch
+
+
 class ReplayBuffer:
     def __init__(self, max_size = 10000):
         self.max_size = max_size # Max size replay buffer
@@ -17,4 +22,12 @@ class ReplayBuffer:
 
     def get_sample(self, batch_size):
         # Retrieve a batch of elements randomly
-        pass
+        samples = random.sample(self.buffer, batch_size)
+
+        # Unpack the samples
+        board_states, action_probs, values, players = zip(*samples)
+
+        # Return the samples
+        return board_states, action_probs, values, players
+
+

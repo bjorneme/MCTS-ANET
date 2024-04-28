@@ -1,25 +1,49 @@
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.optim as optim
+import torch.nn.functional as F
 
 class ANET(nn.Module):
     def __init__(self):
         super(ANET, self).__init__()
+
         # Common layers
-        self.fc1 = nn.Linear(9, 64)  # Assuming a flattened 3x3 Tic Tac Toe board
+        self.fc1 = nn.Linear(27, 64)
         self.fc2 = nn.Linear(64, 64)
 
         # Policy head
-        self.policy_head = nn.Linear(64, 9)  # Output 9 action probabilities
+        self.policy_head = nn.Linear(64, 9)
 
         # Value head
-        self.value_head = nn.Linear(64, 1)  # Output a single value estimate
+        self.value_head = nn.Linear(64, 1)
 
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
 
-        policy = torch.softmax(self.policy_head(x), dim=1)
-        value = torch.tanh(self.value_head(x))  # Output from -1 to 1 (win-loss scale)
+        policy = F.softmax(self.policy_head(x), dim=1)
+        value = torch.tanh(self.value_head(x))
 
         return policy, value
+    
+    def prepare_anet_input(self, batch_of_board_states, players):
+        new_batch_of_board_states = []
+
+        for board_state, player in zip(batch_of_board_states, players):
+            # Matrix 1: Positions occupied by Player 1
+            player_1 = [[1 if cell == 1 else 0 for cell in row] for row in board_state]
+
+            # Matrix 2: Positions occupied by Player -1
+            player_2 = [[1 if cell == -1 else 0 for cell in row] for row in board_state]
+
+            # Matrix 3: Current player's turn. 1 if player 1 and 0 if player -1
+            current_turn = [[int(player == 1) for _ in row] for row in board_state]
+
+            # Combine all states of a sample into a single list, flatten the list
+            flattened_list = [cell for submatrix in [player_1, player_2, current_turn] for row in submatrix for cell in row]
+            new_batch_of_board_states.append(flattened_list)
+
+            # TODO: Change here for CNN
+
+        # Return the prepared batch
+        return torch.Tensor(new_batch_of_board_states)

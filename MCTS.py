@@ -103,7 +103,7 @@ class MCTS:
     
     def get_action_probabilities(self):
         # Calculate action probabilities for each move
-        action_probs = np.zeros(self.total_actions)
+        action_probs = [0]* self.total_actions
         total_visits = sum(child.visits for child in self.root.children)
         for child in self.root.children:
             action_probs[self.pos_to_index(child.move)] = child.visits/ total_visits
