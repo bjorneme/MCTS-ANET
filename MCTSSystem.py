@@ -26,7 +26,7 @@ class MCTSSystem:
     def self_play(self, episode):
 
         # Initialize the game and MCTS
-        state_manager = Hex(3)
+        state_manager = TicTacToe()
         root_node = MCTSNode(self.anet, 1.41, state_manager)
         mcts = MCTS(root_node, 3, 9)
 
@@ -40,7 +40,7 @@ class MCTSSystem:
         while not state_manager.is_game_over():
 
             # Execute the MCTS search. Get probabilities for possible actions
-            action_probs = mcts.run_simulation(2500)
+            action_probs = mcts.run_simulation(10000)
             board_state = copy.deepcopy(state_manager.board)
 
             # Select the best action based on the action probabilities

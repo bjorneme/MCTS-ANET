@@ -46,11 +46,14 @@ class ANET(nn.Module):
             # Matrix 3: Current player's turn. 1 if player 1 and 0 if player -1
             current_turn = [[int(player == 1) for _ in row] for row in board_state]
 
-            # Combine all states of a sample into a single list, flatten the list
-            flattened_list = [cell for submatrix in [player_1, player_2, current_turn] for row in submatrix for cell in row]
-            new_batch_states.append(flattened_list)
-
-            # TODO: Change here for CNN
+            if True:
+                # Combine all states of a sample into a single list, flatten the list
+                state = [cell for submatrix in [player_1, player_2, current_turn] for row in submatrix for cell in row]
+            elif False:
+                # TODO: Logic for CNN
+                combined_state = [player_1, player_2, current_turn]
+            
+            new_batch_states.append(state)
 
         # Return the prepared batch
         return torch.Tensor(new_batch_states)

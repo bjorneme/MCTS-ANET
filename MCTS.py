@@ -45,7 +45,7 @@ class MCTSNode:
         while not simulation_state.is_game_over():
 
             # 30 % chance for taking a random action
-            if random.random() < 0.3:
+            if random.random() < 0.5:
                 possible_moves = simulation_state.get_valid_moves()
                 move = random.choice(possible_moves)
 
