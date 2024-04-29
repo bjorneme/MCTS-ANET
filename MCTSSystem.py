@@ -83,6 +83,11 @@ class MCTSSystem:
             if len(self.replay_buffer.buffer) > 300:
                 self.train()
 
+            # Step 3: Save the model
+            if ga % 10 == 0:
+                self.save_model(ga)
+
+
         # Print final results
         print("Final Results:")
         print(f"Wins: {self.win}, Draws: {self.draw}, Losses: {self.loss}")
@@ -113,6 +118,16 @@ class MCTSSystem:
 
         # Print loss
         print(f"Loss: {loss}")
+
+    def save_model(self, model_index):
+        # Save the model.
+        model_filename = f"model_{model_index}.pth"
+        optimizer_filename = f"optimizer_{model_index}.pth"
+        
+        torch.save(self.anet.state_dict(), model_filename)
+        torch.save(self.optimizer.state_dict(), optimizer_filename)
+        print(f"Model and optimizer saved: {model_filename}, {optimizer_filename}")
+
 
 
 
