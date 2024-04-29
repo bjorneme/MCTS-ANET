@@ -1,10 +1,8 @@
 import math
 import random
-
 import numpy as np
+import torch.nn.functional as F
 import torch
-from games.Hex import Hex
-from games.TicTacToe import TicTacToe
 
 # MCTSNode: node in the tree
 class MCTSNode:
@@ -75,11 +73,12 @@ class MCTSNode:
     
     def select_anet_move(self, state):
         # Use the anet to select the most promising move
+        self.anet.eval()
         input = self.anet.prepare_input([state.board], [state.current_player])
         with torch.no_grad():
             predicted_probs, _ = self.anet(input)
         valid_moves = state.get_valid_moves_hot_encoded()
-        predicted_probs = predicted_probs * torch.Tensor(valid_moves)
+        predicted_probs = F.softmax(predicted_probs,dim=1) * torch.Tensor(valid_moves)
         return np.argmax(predicted_probs.detach().numpy())
 
 

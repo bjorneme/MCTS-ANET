@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 from torch import optim
 from ANET import ANET
 from MCTS import MCTS, MCTSNode
@@ -14,13 +15,18 @@ class MCTSSystem:
     def __init__(self,anet):
         self.replay_buffer = ReplayBuffer()
         self.anet = anet
-        self.num_games = 25
-        self.batch_size = 32
+        self.num_games = 100
+        self.batch_size = 256
+
+        # Initialize optimizer and loss function
+        self.optimizer = optim.Adam(anet.parameters(), lr=0.001)
+        self.loss_policy = nn.CrossEntropyLoss()
+        self.loss_value = nn.MSELoss()
 
     def self_play(self, episode):
 
         # Initialize the game and MCTS
-        state_manager = TicTacToe()
+        state_manager = Hex(3)
         root_node = MCTSNode(self.anet, 1.41, state_manager)
         mcts = MCTS(root_node, 3, 9)
 
@@ -74,16 +80,14 @@ class MCTSSystem:
             self.self_play(ga)
 
             # Step 2: Train ANET on random minibatches of cases from Replay buffer
-            if len(self.replay_buffer.buffer) > 50:
+            if len(self.replay_buffer.buffer) > 300:
                 self.train()
 
         # Print final results
         print("Final Results:")
         print(f"Wins: {self.win}, Draws: {self.draw}, Losses: {self.loss}")
 
-    def train(self):
-        optimizer = optim.Adam(anet.parameters(), lr=0.001)
-        
+    def train(self):        
         # Set model to training mode
         anet.train()
 
@@ -95,15 +99,17 @@ class MCTSSystem:
 
         # Forward pass
         predicted_probs, predicted_values = self.anet(input_state_anet)
+        print(predicted_probs[0])
+        print(action_probs[0])
 
         # Calculate loss
-        value_loss = F.mse_loss(predicted_values, torch.Tensor(values))
-        policy_loss = F.cross_entropy(predicted_probs, torch.Tensor(action_probs))
+        value_loss = self.loss_value(predicted_values, torch.Tensor(values))
+        policy_loss = self.loss_policy(predicted_probs, torch.Tensor(action_probs))
         loss = policy_loss + value_loss
 
         # Backward pass and optimize
         loss.backward()
-        optimizer.step()
+        self.optimizer.step()
 
         # Print loss
         print(f"Loss: {loss}")

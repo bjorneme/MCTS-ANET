@@ -1,30 +1,37 @@
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 class ANET(nn.Module):
     def __init__(self):
         super(ANET, self).__init__()
 
-        # Common layers
-        self.fc1 = nn.Linear(27, 64)
-        self.fc2 = nn.Linear(64, 64)
+        # Shared layers
+        self.shared_layers = nn.Sequential(
+            nn.Linear(27, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU()
+        )
 
-        # Policy head
-        self.policy_head = nn.Linear(64, 9)
+        # Policy head (output probabilities for 9 actions)
+        self.policy_head = nn.Linear(128, 9)
 
-        # Value head
-        self.value_head = nn.Linear(64, 1)
+        # Value head (output a single value estimate)
+        self.value_head = nn.Linear(128, 1)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = self.shared_layers(x)
 
-        policy = F.softmax(self.policy_head(x), dim=1)
+        # Compute policy output
+        policy = self.policy_head(x)
+
+        # Compute value output and apply tanh activation
         value = torch.tanh(self.value_head(x))
 
         return policy, value
+
     
     def prepare_input(self, batch_states, players):
         new_batch_states = []
