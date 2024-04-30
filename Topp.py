@@ -1,16 +1,16 @@
 import random
 import torch
 import torch.nn.functional as F
-from ANET import ANET
-from games.Hex import Hex
+
 
 #TOPP: Tournamet of progressive player
 class Topp:
-    def __init__(self, num_games, model_paths):
+    def __init__(self, num_games, model_paths, anet, state_manager):
         # List of model paths
         self.model_paths = model_paths
-        self.anet = ANET()
+        self.anet = anet
         self.num_games = num_games
+        self.state_manager = state_manager
 
 
     def run_tournament(self):
@@ -44,7 +44,7 @@ class Topp:
 
     def play_match(self, model_1, model_2):
         # Initialize the game
-        state_manager = Hex(4)
+        state_manager = self.state_manager.reset()
 
         # Play until the game is over
         while not state_manager.is_game_over():
@@ -79,10 +79,7 @@ class Topp:
         # Choose top N probable actions. Used such that the model doesnt return the same result each time
         if (sum(valid_moves) > 13):
             N = min(3, sum(valid_moves))
-
             _, top_indexes = torch.topk(predicted_probs[0], N)
-
-            # Choose a random action from the top N
             action= random.choice(top_indexes.tolist())  
 
         else:
@@ -93,19 +90,10 @@ class Topp:
         return action
 
 
-
     def load_model(self, path):
         # Load a model.
         self.anet.load_state_dict(torch.load(path))
         self.anet.eval()
-
-
-# Simulate the four Topp games
-topp = Topp(
-    model_paths = ['models/model_Hex_4_1.pth','models/model_Hex_4_2.pth', 'models/model_Hex_4_3.pth','models/model_untrained.pth'],
-    num_games= 20
-)
-topp.run_tournament()
 
 
 

@@ -155,3 +155,6 @@ class Hex:
             if self.check_win() == -1:
                 return -1
             return 0
+        
+    def reset(self):
+        return Hex(self.board_size)
