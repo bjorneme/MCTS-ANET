@@ -48,6 +48,8 @@ class Topp:
 
         # Play until the game is over
         while not state_manager.is_game_over():
+
+            state_manager.display_board()
                 
             # Select the model based on current player
             if state_manager.current_player == 1:
@@ -60,6 +62,8 @@ class Topp:
 
             # Execute the action
             state_manager.make_move(best_move)
+
+        state_manager.display_board()
 
         # Return the result:
         return state_manager.get_winner()

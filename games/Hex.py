@@ -122,21 +122,30 @@ class Hex:
         return False
     
     def display_board(self):
-        # Print the board state
+        # Symbols representing players
         symbols = {0: '.', 1: 'X', -1: 'O'}
 
-        # Loop through each row in the board
-        for row_index, row in enumerate(self.board):
+        # Width printout
+        width = 2 * self.board_size - 1
 
-            # Add a space extra for each row
-            row_display = ' ' * row_index
+        # Create an output list of lists, initialized with spaces
+        output = [[' ' for _ in range(width)] for _ in range(width)]
 
-            # Add symbols for each cell in the row
-            for cell in row:
-                row_display += symbols[cell] + " "
+        # Map each element in the board to the new output list
+        for i in range(self.board_size):
+            for j in range(self.board_size):
+                # Calculate new positions
+                new_row = i + j
+                new_col = self.board_size - 1 + i - j
+                
+                # Use symbols representing players
+                output[new_row][new_col] = symbols[self.board[i][j]]
 
-            # Print the formatted row
-            print(row_display)
+        # Print the rotated matrix
+        for line in output:
+            print(' '.join(line))
+
+        print()
 
     def copy(self):
         # Create a deep copy of the game state

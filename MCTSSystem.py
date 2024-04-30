@@ -1,4 +1,5 @@
 import copy
+from matplotlib import pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,7 +7,7 @@ from MCTS import MCTS, MCTSNode
 from ReplayBuffer import ReplayBuffer
 
 class MCTSSystem:
-    def __init__(self, anet, state_manager, board_size, total_actions, optimizer, num_games, batch_size, c, mcts_searches, model_path=None, optimizer_path=None):
+    def __init__(self, anet, state_manager, board_size, total_actions, optimizer, num_games, batch_size, c, mcts_searches, e_greedy_mcts, num_anet_cached, model_path=None, optimizer_path=None):
         # The game
         self.state_manager = state_manager
         self.board_size = board_size
@@ -16,12 +17,14 @@ class MCTSSystem:
         # MCTS
         self.mcts_searches = mcts_searches
         self.c = c
+        self.e_greedy_mcts = e_greedy_mcts
 
         # The Replay Buffer
         self.replay_buffer = ReplayBuffer()
 
         # Actor network
         self.anet = anet
+        self.num_anet_cached = num_anet_cached
 
         # Initialize optimizer, loss function and batch size
         self.optimizer = optimizer
@@ -32,12 +35,15 @@ class MCTSSystem:
         if model_path is not None and optimizer_path is not None:
             self.load_model(model_path, optimizer_path)
 
+        # List to store loss. Used for plotting
+        self.loss_history = []
+
 
     def self_play(self, episode):
 
         # Initialize the game and MCTS
         state_manager = self.state_manager.reset()
-        root_node = MCTSNode(self.anet, self.c, state_manager)
+        root_node = MCTSNode(self.anet, self.e_greedy_mcts, self.c, state_manager)
         mcts = MCTS(root_node, self.board_size, self.total_actions)
 
         # Alternate the starting player
@@ -80,7 +86,7 @@ class MCTSSystem:
         # For counting win/ draw/ loss
         self.win, self.draw, self.loss = 0, 0, 0
 
-        for ga in range(self.num_games):
+        for ga in range(self.num_games + 1):
             # Step 1: Play games
             self.self_play(ga)
 
@@ -89,7 +95,7 @@ class MCTSSystem:
                 self.train()
 
             # Step 3: Save the model
-            if ga % 10 == 0:
+            if ga % (self.num_games/int(self.num_anet_cached-1)) == 0:
                 self.save_model(ga)
 
 
@@ -114,6 +120,7 @@ class MCTSSystem:
 
         # Calculate loss
         loss = self.loss_function(predicted_probs, torch.Tensor(action_probs))
+        self.loss_history.append(loss)
 
         # Backward pass and optimize
         loss.backward()
@@ -136,3 +143,12 @@ class MCTSSystem:
             print("Model and optimizer have been successfully loaded.")
         except FileNotFoundError:
             print("No model and optimizer found. Creating a new one.")
+
+    def plot_learning_progress(self):
+        # Plot the learning progress.
+        plt.plot(self.loss_history)
+        plt.title('Plot of the List')
+        plt.xlabel('Index')
+        plt.ylabel('Value')
+        plt.grid(True)
+        plt.show()

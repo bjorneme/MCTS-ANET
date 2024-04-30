@@ -6,7 +6,7 @@ import torch
 
 # MCTSNode: node in the tree
 class MCTSNode:
-    def __init__(self, anet, c, current_state, move=None, parent=None):
+    def __init__(self, anet, e_greedy_mcts, c, current_state, move=None, parent=None):
         self.current_state = current_state # State of the game at this node
         self.move = move # Move that led to this node
         self.parent = parent # Parent to this node
@@ -16,7 +16,7 @@ class MCTSNode:
         self.untried_moves = current_state.get_valid_moves() # Moves available and not tried in from this state
         self.anet = anet # Actor Network
         self.c = c # Exploration constant
-        self.e_greedy = 0.5 # Chance of taking random action under rollout
+        self.e_greedy_mcts = e_greedy_mcts # Chance of taking random action under rollout
 
     def select_best_child(self):
         # Player 1 is maximizing
@@ -34,7 +34,7 @@ class MCTSNode:
             self.untried_moves.remove(move)
             new_state = self.current_state.copy()
             new_state.make_move(move)
-            new_child_node = MCTSNode(self.anet, self.c,new_state,move, self)
+            new_child_node = MCTSNode(self.anet, self.e_greedy_mcts, self.c,new_state,move, self)
             self.children.append(new_child_node)
             return new_child_node
 
@@ -45,7 +45,7 @@ class MCTSNode:
         while not simulation_state.is_game_over():
 
             # 30 % chance for taking a random action
-            if random.random() < self.e_greedy:
+            if random.random() < self.e_greedy_mcts:
                 possible_moves = simulation_state.get_valid_moves()
                 move = random.choice(possible_moves)
 

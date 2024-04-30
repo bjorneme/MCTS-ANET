@@ -61,6 +61,8 @@ def main():
             batch_size=config['training']['batch_size'],
             c=config['training']['c'],
             mcts_searches = config['training']['mcts_searches'],
+            e_greedy_mcts = config['training']['e_greedy_mcts'],
+            num_anet_cached = config['topp']['num_anet_cached'],
             model_path=config['training']['model_path'],
             optimizer_path=config['training']['optimizer_path']
         )

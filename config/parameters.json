@@ -13,11 +13,12 @@
         "learning_rate": 0.001,
         "optimizer": "Adam",
         "batch_size": 256,
-        "num_episodes": 100
+        "num_episodes": 100,
+        "e_greedy_mcts": 0.5
     },
     "topp": {
         "model_paths": [
-            "models/model_untrained.pth",
+            "model_50.pth",
             "models/model_Hex_4_3.pth"
         ],
         "num_games": 20,
