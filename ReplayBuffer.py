@@ -1,8 +1,7 @@
+import random
 
 
 # Replaybuffer: store samples from self play
-import random
-
 class ReplayBuffer:
     def __init__(self, max_size = 10000):
         self.max_size = max_size # Max size replay buffer
