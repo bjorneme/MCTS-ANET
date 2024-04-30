@@ -3,7 +3,8 @@ from torch import optim
 
 from ANET import ANET
 from MCTSSystem import MCTSSystem
-from Topp import Topp
+from Topp.PlayGame import PlayGame
+from Topp.Topp import Topp
 from games.Hex import Hex
 from games.TicTacToe import TicTacToe
 
@@ -48,7 +49,7 @@ def main():
         raise ValueError(f"Unsupported optimizer: {optimizer_name}")
     
     # Select training or TOPP
-    if(config['training_or_topp'] == 'Training'):
+    if(config['mode'] == 'Training'):
 
         # Initalize the system class
         mcts = MCTSSystem(
@@ -75,7 +76,7 @@ def main():
             mcts.plot_learning_progress()
 
     # Select training or TOPP
-    elif(config['training_or_topp'] == 'Topp'):
+    elif(config['mode'] == 'Topp'):
 
         # Initialize Topp class
         topp = Topp(
@@ -87,6 +88,19 @@ def main():
 
         # Run Topp
         topp.run_tournament()
+
+    # Select training or TOPP
+    elif(config['mode'] == 'Play'):
+
+        # Initialize Play game class
+        match = PlayGame(
+            state_manager=game,
+            anet=anet,
+            model_path=config['playgame']['model_path']
+        )
+
+        # Play match
+        match.play_match(config['playgame']['start'])
 
 if __name__ == "__main__":
     main()

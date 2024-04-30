@@ -1,5 +1,5 @@
 {
-    "training_or_topp": "Topp",
+    "mode": "Play",
     "plot_learning": true,
     "game": {
         "type_of_game": "Hex",
@@ -23,5 +23,9 @@
         ],
         "num_games": 20,
         "num_anet_cached": 5
+    },
+    "playgame": {
+        "start": false,
+        "model_path": "models/model_Hex_4_3.pth"
     }
 }
