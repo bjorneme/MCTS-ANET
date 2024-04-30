@@ -9,12 +9,12 @@ class ReplayBuffer:
         self.buffer = [] # The replay buffer
         self.position = 0 # Position in the buffer
 
-    def push_to_buffer(self, board_state, action_probs, value, player):
+    def push_to_buffer(self, board_state, action_probs, player):
         if len(self.buffer) < self.max_size:
             self.buffer.append(None)
 
         # Save to the buffer
-        self.buffer[self.position] = (board_state, action_probs, value, player)
+        self.buffer[self.position] = (board_state, action_probs, player)
         self.position = (self.position + 1) % self.max_size
 
     def get_sample(self, batch_size):
@@ -22,9 +22,9 @@ class ReplayBuffer:
         samples = random.sample(self.buffer, batch_size)
 
         # Unpack the samples
-        board_states, action_probs, values, players = zip(*samples)
+        board_states, action_probs, players = zip(*samples)
 
         # Return the samples
-        return board_states, action_probs, values, players
+        return board_states, action_probs, players
 
 

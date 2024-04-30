@@ -5,32 +5,26 @@ class ANET(nn.Module):
     def __init__(self):
         super(ANET, self).__init__()
 
-        # Shared layers
-        self.shared_layers = nn.Sequential(
+        # Layers
+        self.layers = nn.Sequential(
             nn.Linear(27, 128),
             nn.BatchNorm1d(128),
             nn.ReLU(),
             nn.Linear(128, 128),
             nn.BatchNorm1d(128),
-            nn.ReLU()
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Linear(128, 9)
         )
 
-        # Policy head (output probabilities for 9 actions)
-        self.policy_head = nn.Linear(128, 9)
-
-        # Value head (output a single value estimate)
-        self.value_head = nn.Linear(128, 1)
-
     def forward(self, x):
-        x = self.shared_layers(x)
-
-        # Compute policy output
-        policy = self.policy_head(x)
-
-        # Compute value output and apply tanh activation
-        value = torch.tanh(self.value_head(x))
-
-        return policy, value
+        x = self.layers(x)
+        return x
 
     
     def prepare_input(self, batch_states, players):

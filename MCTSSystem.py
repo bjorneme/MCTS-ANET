@@ -20,8 +20,7 @@ class MCTSSystem:
 
         # Initialize optimizer and loss function
         self.optimizer = optim.Adam(anet.parameters(), lr=0.001)
-        self.loss_policy = nn.CrossEntropyLoss()
-        self.loss_value = nn.MSELoss()
+        self.loss_function = nn.CrossEntropyLoss()
 
     def self_play(self, episode):
 
@@ -34,14 +33,13 @@ class MCTSSystem:
         if(episode % 2 == 0):
             state_manager.current_player = -1
 
-        buffer = []
-
         # Play until game is over
         while not state_manager.is_game_over():
 
             # Execute the MCTS search. Get probabilities for possible actions
             action_probs = mcts.run_simulation(10000)
             board_state = copy.deepcopy(state_manager.board)
+            player = copy.deepcopy(state_manager.current_player)
 
             # Select the best action based on the action probabilities
             best_action = np.argmax(action_probs)
@@ -49,7 +47,7 @@ class MCTSSystem:
             print(best_action)
 
             # Save to a buffer, before loading into replay buffer
-            buffer.append((board_state, action_probs, state_manager.current_player))
+            self.replay_buffer.push_to_buffer(board_state, action_probs, player)
 
             # Execute the best action
             state_manager.make_move(best_action)
@@ -66,10 +64,6 @@ class MCTSSystem:
         else:
             self.loss += 1
         print(f"Episode {episode}")
-
-        # Append game to replay buffer
-        for board_state, action_probs, player in buffer:
-            self.replay_buffer.push_to_buffer(board_state, action_probs, [result], player)
 
     def run_system(self):
         # For counting win/ draw/ loss
@@ -97,20 +91,18 @@ class MCTSSystem:
         anet.train()
 
         # Sample a batch from Replay Buffer
-        board_states, action_probs, values, players = self.replay_buffer.get_sample(self.batch_size)
+        board_states, action_probs, players = self.replay_buffer.get_sample(self.batch_size)
 
         # Prepare board state
         input_state_anet = self.anet.prepare_input(board_states, players)
 
         # Forward pass
-        predicted_probs, predicted_values = self.anet(input_state_anet)
+        predicted_probs = self.anet(input_state_anet)
         print(predicted_probs[0])
         print(action_probs[0])
 
         # Calculate loss
-        value_loss = self.loss_value(predicted_values, torch.Tensor(values))
-        policy_loss = self.loss_policy(predicted_probs, torch.Tensor(action_probs))
-        loss = policy_loss + value_loss
+        loss = self.loss_function(predicted_probs, torch.Tensor(action_probs))
 
         # Backward pass and optimize
         loss.backward()
@@ -121,12 +113,9 @@ class MCTSSystem:
 
     def save_model(self, model_index):
         # Save the model.
-        model_filename = f"model_{model_index}.pth"
-        optimizer_filename = f"optimizer_{model_index}.pth"
-        
-        torch.save(self.anet.state_dict(), model_filename)
-        torch.save(self.optimizer.state_dict(), optimizer_filename)
-        print(f"Model and optimizer saved: {model_filename}, {optimizer_filename}")
+        torch.save(self.anet.state_dict(), f"model_{model_index}.pth")
+        torch.save(self.optimizer.state_dict(), f"optimizer_{model_index}.pth")
+        print(f"Model and optimizer saved.")
 
 
 

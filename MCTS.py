@@ -76,7 +76,7 @@ class MCTSNode:
         self.anet.eval()
         input = self.anet.prepare_input([state.board], [state.current_player])
         with torch.no_grad():
-            predicted_probs, _ = self.anet(input)
+            predicted_probs = self.anet(input)
         valid_moves = state.get_valid_moves_hot_encoded()
         predicted_probs = F.softmax(predicted_probs,dim=1) * torch.Tensor(valid_moves)
         return np.argmax(predicted_probs.detach().numpy())
