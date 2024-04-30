@@ -7,19 +7,19 @@ class ANET(nn.Module):
 
         # Layers
         self.layers = nn.Sequential(
-            nn.Linear(27, 128),
+            nn.Linear(48, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Linear(128, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
             nn.BatchNorm1d(128),
             nn.ReLU(),
             nn.Linear(128, 128),
             nn.BatchNorm1d(128),
             nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Linear(128, 9)
+            nn.Linear(128, 16)
         )
 
     def forward(self, x):
