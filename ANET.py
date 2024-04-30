@@ -1,26 +1,24 @@
+import json
 import torch
 import torch.nn as nn
 
 class ANET(nn.Module):
-    def __init__(self):
+    def __init__(self, config_path):
         super(ANET, self).__init__()
+        self.layers = self.create_layers(config_path)
 
-        # Layers
-        self.layers = nn.Sequential(
-            nn.Linear(48, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Linear(128, 256),
-            nn.BatchNorm1d(256),
-            nn.ReLU(),
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Linear(128, 16)
-        )
+    def create_layers(self, config_path):
+        with open(config_path, 'r') as file:
+            config = json.load(file)
+        layers = []
+        for layer in config["layers"]:
+            if layer["type"] == "Linear":
+                layers.append(nn.Linear(layer["input"], layer["output"]))
+            elif layer["type"] == "BatchNorm1d":
+                layers.append(nn.BatchNorm1d(layer["num_features"]))
+            elif layer["type"] == "ReLU":
+                layers.append(nn.ReLU())
+        return nn.Sequential(*layers)
 
     def forward(self, x):
         x = self.layers(x)

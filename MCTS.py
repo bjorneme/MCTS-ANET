@@ -16,7 +16,7 @@ class MCTSNode:
         self.untried_moves = current_state.get_valid_moves() # Moves available and not tried in from this state
         self.anet = anet # Actor Network
         self.c = c # Exploration constant
-        self.e_greedy = 0.3 # Chance of taking random action under rollout
+        self.e_greedy = 0.5 # Chance of taking random action under rollout
 
     def select_best_child(self):
         # Player 1 is maximizing
@@ -45,7 +45,7 @@ class MCTSNode:
         while not simulation_state.is_game_over():
 
             # 30 % chance for taking a random action
-            if random.random() < 0.5:
+            if random.random() < self.e_greedy:
                 possible_moves = simulation_state.get_valid_moves()
                 move = random.choice(possible_moves)
 

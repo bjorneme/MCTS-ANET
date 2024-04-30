@@ -1,33 +1,44 @@
 import copy
 import numpy as np
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
-from torch import optim
-from ANET import ANET
 from MCTS import MCTS, MCTSNode
 from ReplayBuffer import ReplayBuffer
-from games.Hex import Hex
-from games.TicTacToe import TicTacToe
-
 
 class MCTSSystem:
-    def __init__(self,anet):
-        self.replay_buffer = ReplayBuffer()
-        self.anet = anet
-        self.num_games = 100
-        self.batch_size = 256
+    def __init__(self, anet, state_manager, board_size, total_actions, optimizer, num_games, batch_size, c, mcts_searches, model_path=None, optimizer_path=None):
+        # The game
+        self.state_manager = state_manager
+        self.board_size = board_size
+        self.total_actions = total_actions
+        self.num_games = num_games
 
-        # Initialize optimizer and loss function
-        self.optimizer = optim.Adam(anet.parameters(), lr=0.001)
+        # MCTS
+        self.mcts_searches = mcts_searches
+        self.c = c
+
+        # The Replay Buffer
+        self.replay_buffer = ReplayBuffer()
+
+        # Actor network
+        self.anet = anet
+
+        # Initialize optimizer, loss function and batch size
+        self.optimizer = optimizer
         self.loss_function = nn.CrossEntropyLoss()
+        self.batch_size = batch_size
+
+        # Load model and optimizer if paths are provided
+        if model_path is not None and optimizer_path is not None:
+            self.load_model(model_path, optimizer_path)
+
 
     def self_play(self, episode):
 
         # Initialize the game and MCTS
-        state_manager = Hex(4)
-        root_node = MCTSNode(self.anet, 1.41, state_manager)
-        mcts = MCTS(root_node, 4, 16)
+        state_manager = self.state_manager.reset()
+        root_node = MCTSNode(self.anet, self.c, state_manager)
+        mcts = MCTS(root_node, self.board_size, self.total_actions)
 
         # Alternate the starting player
         if(episode % 2 == 0):
@@ -37,7 +48,7 @@ class MCTSSystem:
         while not state_manager.is_game_over():
 
             # Execute the MCTS search. Get probabilities for possible actions
-            action_probs = mcts.run_simulation(2500)
+            action_probs = mcts.run_simulation(self.mcts_searches)
             board_state = copy.deepcopy(state_manager.board)
             player = copy.deepcopy(state_manager.current_player)
 
@@ -74,7 +85,7 @@ class MCTSSystem:
             self.self_play(ga)
 
             # Step 2: Train ANET on random minibatches of cases from Replay buffer
-            if len(self.replay_buffer.buffer) > 300:
+            if len(self.replay_buffer.buffer) >= self.batch_size:
                 self.train()
 
             # Step 3: Save the model
@@ -88,16 +99,16 @@ class MCTSSystem:
 
     def train(self):        
         # Set model to training mode
-        anet.train()
+        self.anet.train()
 
         # Sample a batch from Replay Buffer
         board_states, action_probs, players = self.replay_buffer.get_sample(self.batch_size)
 
         # Prepare board state
-        input_state_anet = self.anet.prepare_input(board_states, players)
+        input = self.anet.prepare_input(board_states, players)
 
         # Forward pass
-        predicted_probs = self.anet(input_state_anet)
+        predicted_probs = self.anet(input)
         print(predicted_probs[0])
         print(action_probs[0])
 
@@ -117,13 +128,11 @@ class MCTSSystem:
         torch.save(self.optimizer.state_dict(), f"optimizer_{model_index}.pth")
         print(f"Model and optimizer saved.")
 
-
-
-
-
-
-
-
-anet = ANET()
-system = MCTSSystem(anet)
-system.run_system()
+    def load_model(self, model_path, optimizer_path):
+        # Load existing model.
+        try:
+            self.anet.load_state_dict(torch.load(model_path))
+            self.optimizer.load_state_dict(torch.load(optimizer_path))
+            print("Model and optimizer have been successfully loaded.")
+        except FileNotFoundError:
+            print("No model and optimizer found. Creating a new one.")

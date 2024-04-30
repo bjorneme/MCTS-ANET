@@ -95,3 +95,6 @@ class TicTacToe:
             if self.check_win() == -1:
                 return -1
             return 0
+        
+    def reset(self):
+        return TicTacToe()
