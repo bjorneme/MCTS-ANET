@@ -1,0 +1,13 @@
+{
+    "type_network": "CNN",
+    "layers": [
+        {"type": "Conv2d", "input": 3, "output": 32, "kernel": 3, "stride": 1, "padding": 1},
+        {"type": "ReLU"},
+        {"type": "MaxPool2d", "kernel": 2, "stride": 2},
+        {"type": "Flatten"},
+        {"type": "Linear", "input": 128, "output": 128},
+        {"type": "ReLU"},
+        {"type": "Linear", "input": 128, "output": 16}
+      ]
+  }
+  

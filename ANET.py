@@ -9,15 +9,41 @@ class ANET(nn.Module):
 
     def create_layers(self, config_path):
         with open(config_path, 'r') as file:
-            config = json.load(file)
+            self.config = json.load(file)
+
+        # Create the layers
         layers = []
-        for layer in config["layers"]:
-            if layer["type"] == "Linear":
+        for layer in self.config["layers"]:
+            layer_type = layer["type"]
+
+            # Linear layer
+            if layer_type == "Linear":
                 layers.append(nn.Linear(layer["input"], layer["output"]))
-            elif layer["type"] == "BatchNorm1d":
+
+            # Batch norm 1D
+            elif layer_type == "BatchNorm1d":
                 layers.append(nn.BatchNorm1d(layer["num_features"]))
-            elif layer["type"] == "ReLU":
+
+            # Activation functions  
+            elif layer_type == "ReLU":
                 layers.append(nn.ReLU())
+            elif layer_type == "Sigmoid":
+                layers.append(nn.Sigmoid())
+            elif layer_type == "Tanh":
+                layers.append(nn.Tanh())
+
+            # Convolutional layer
+            elif layer_type == "Conv2d":
+                layers.append(nn.Conv2d(layer["input"], layer["output"], layer["kernel"], layer["stride"], layer["padding"]))
+
+            # Max Pooling
+            elif layer_type == "MaxPool2d":
+                layers.append(nn.MaxPool2d(layer["kernel"], stride=layer.get("stride", 2)))
+
+            # Flatten layer
+            elif layer_type == "Flatten":
+                layers.append(nn.Flatten())
+
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -38,12 +64,12 @@ class ANET(nn.Module):
             # Matrix 3: Current player's turn. 1 if player 1 and 0 if player -1
             current_turn = [[int(player == 1) for _ in row] for row in board_state]
 
-            if True:
-                # Combine all states of a sample into a single list, flatten the list
+            # Flatten for MLP
+            if self.config["type_network"] == "MLP":
                 state = [cell for submatrix in [player_1, player_2, current_turn] for row in submatrix for cell in row]
-            elif False:
-                # TODO: Logic for CNN
-                combined_state = [player_1, player_2, current_turn]
+            # Three channels for CNN
+            elif self.config["type_network"] == "CNN":
+                state = [player_1, player_2, current_turn]
             
             new_batch_states.append(state)
 

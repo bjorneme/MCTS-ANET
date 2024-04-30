@@ -1,0 +1,26 @@
+{
+    "training_or_topp": "Topp",
+    "plot_learning": true,
+    "game": {
+        "type_of_game": "Hex",
+        "board_size": 4
+    },
+    "training": {
+        "model_path": null,
+        "optimizer_path": null,
+        "mcts_searches": 2500,
+        "c": 1.41,
+        "learning_rate": 0.001,
+        "optimizer": "Adam",
+        "batch_size": 256,
+        "num_episodes": 100
+    },
+    "topp": {
+        "model_paths": [
+            "models/model_untrained.pth",
+            "models/model_Hex_4_3.pth"
+        ],
+        "num_games": 20,
+        "num_anet_cached": 5
+    }
+}

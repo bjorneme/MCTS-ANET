@@ -1,32 +1,90 @@
+import json
 from torch import optim
 
 from ANET import ANET
 from MCTSSystem import MCTSSystem
 from Topp import Topp
 from games.Hex import Hex
+from games.TicTacToe import TicTacToe
 
-game = Hex(4)
-anet = ANET(config_path="config/anet.json")
+# Funciton for loading the config file
+def load_config(config_file='config/parameters.json'):
+    with open(config_file, 'r') as f:
+        config = json.load(f)
+    return config
 
-system = MCTSSystem(
-    anet,
-    state_manager=game,
-    board_size=4,
-    total_actions=16,
-    optimizer=optim.Adam(anet.parameters(), lr=0.001),
-    num_games=100,
-    batch_size=256,
-    c=1.41,
-    mcts_searches=2500,
-    model_path='models/model_Hex_4_3.pth',
-    optimizer_path='optimizer_0.pth'
-)
-# system.run_system()
+def main():
+    # Load the config
+    config = load_config()
 
-topp = Topp(
-    model_paths = ['models/model_untrained.pth','model_50.pth', 'model_60.pth','model_70.pth', 'models/model_Hex_4_3.pth'],
-    num_games= 20,
-    anet = ANET(config_path="config/anet.json"),
-    state_manager=Hex(4)
-)
-topp.run_tournament()
+    # Select game
+    board_size = config['game']['board_size']
+    if(config['game']['type_of_game'] == 'TicTacToe'):
+        game = TicTacToe()
+        total_actions = board_size**2
+    elif(config['game']['type_of_game'] == 'Hex'):
+        game = Hex(board_size)
+        total_actions = board_size**2
+    else:
+        raise ValueError(f"Unsupported game!")
+
+    # Initialize the Actor Network
+    anet = ANET(config_path="config/anet.json")
+
+    # Initialize learning rate
+    learning_rate = config['training']['learning_rate']
+
+    # Initialize optimizer based on configuration
+    optimizer_name = config['training']['optimizer']  
+    if optimizer_name == "Adam":
+        optimizer = optim.Adam(anet.parameters(), lr=learning_rate)
+    elif optimizer_name == "Adagrad":
+        optimizer = optim.Adagrad(anet.parameters(), lr=learning_rate)
+    elif optimizer_name == "SGD":
+        optimizer = optim.SGD(anet.parameters(), lr=learning_rate)
+    elif optimizer_name == "RMSProp":
+        optimizer = optim.RMSprop(anet.parameters(), lr=learning_rate)
+    else:
+        raise ValueError(f"Unsupported optimizer: {optimizer_name}")
+    
+    # Select training or TOPP
+    if(config['training_or_topp'] == 'Training'):
+
+        # Initalize the system class
+        mcts = MCTSSystem(
+            anet,
+            state_manager=game,
+            board_size=board_size,
+            total_actions=total_actions,
+            optimizer=optimizer,
+            num_games=config['training']['num_episodes'],
+            batch_size=config['training']['batch_size'],
+            c=config['training']['c'],
+            mcts_searches = config['training']['mcts_searches'],
+            model_path=config['training']['model_path'],
+            optimizer_path=config['training']['optimizer_path']
+        )
+
+        # Run the system
+        mcts.run_system()
+
+        # Plot the learning progress
+        if config['plot_learning']:
+            mcts.plot_learning_progress()
+
+    # Select training or TOPP
+    elif(config['training_or_topp'] == 'Topp'):
+
+        # Initialize Topp class
+        topp = Topp(
+            model_paths=config['topp']['model_paths'],
+            num_games=config['topp']['num_games'],
+            anet=anet,
+            state_manager=game
+        )
+
+        # Run Topp
+        topp.run_tournament()
+
+if __name__ == "__main__":
+    main()
