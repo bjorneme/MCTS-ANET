@@ -1,6 +1,7 @@
 import json
 import torch
 import torch.nn as nn
+from ANET.ResidualBlock import ResidualBlock
 
 class ANET(nn.Module):
     def __init__(self, config_path):
@@ -24,7 +25,11 @@ class ANET(nn.Module):
             elif layer_type == "BatchNorm1d":
                 layers.append(nn.BatchNorm1d(layer["num_features"]))
 
-            # Activation functions  
+            # Batch norm 2D
+            elif layer_type == "BatchNorm2d":
+                layers.append(nn.BatchNorm2d(layer["num_features"]))
+
+            # Activation functions
             elif layer_type == "ReLU":
                 layers.append(nn.ReLU())
             elif layer_type == "Sigmoid":
@@ -35,6 +40,10 @@ class ANET(nn.Module):
             # Convolutional layer
             elif layer_type == "Conv2d":
                 layers.append(nn.Conv2d(layer["input"], layer["output"], layer["kernel"], layer["stride"], layer["padding"]))
+
+            # Add Residual block
+            elif layer_type == "ResidualBlock":
+                layers.append(ResidualBlock(layer["channels"]))
 
             # Max Pooling
             elif layer_type == "MaxPool2d":
@@ -51,6 +60,7 @@ class ANET(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        # Forward pass
         x = self.layers(x)
         return x
 
