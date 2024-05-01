@@ -52,13 +52,20 @@ class Topp:
             state_manager.display_board()
                 
             # Select the model based on current player
-            if state_manager.current_player == 1:
-                self.load_model(model_1)
-            elif state_manager.current_player == -1:
-                self.load_model(model_2)
+            if model_1 == 'Random' and state_manager.current_player == 1:
+                possible_moves = state_manager.get_valid_moves()
+                best_move = random.choice(possible_moves)
+            elif model_2 == 'Random' and state_manager.current_player == -1:
+                possible_moves = state_manager.get_valid_moves()
+                best_move = random.choice(possible_moves)
+            else:
+                if state_manager.current_player == 1:
+                    self.load_model(model_1)
+                elif state_manager.current_player == -1:
+                    self.load_model(model_2)
 
-            # Select the action
-            best_move = self.select_action(state_manager)
+                # Select the action
+                best_move = self.select_action(state_manager)
 
             # Execute the action
             state_manager.make_move(best_move)
