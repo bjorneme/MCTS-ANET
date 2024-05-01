@@ -1,7 +1,7 @@
 import json
 from torch import optim
 
-from ANET.ANET import ANET
+from Anet.ANET import ANET
 from MCTSSystem import MCTSSystem
 from Topp.PlayGame import PlayGame
 from Topp.Topp import Topp

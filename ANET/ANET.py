@@ -1,7 +1,7 @@
 import json
 import torch
 import torch.nn as nn
-from ANET.ResidualBlock import ResidualBlock
+from Anet.ResidualBlock import ResidualBlock
 
 class ANET(nn.Module):
     def __init__(self, config_path):
