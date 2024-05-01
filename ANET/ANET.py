@@ -40,6 +40,10 @@ class ANET(nn.Module):
             elif layer_type == "MaxPool2d":
                 layers.append(nn.MaxPool2d(layer["kernel"], stride=layer.get("stride", 2)))
 
+            # Dropout layer
+            elif layer_type == "Dropout":
+                layers.append(nn.Dropout(layer["p"]))
+
             # Flatten layer
             elif layer_type == "Flatten":
                 layers.append(nn.Flatten())
