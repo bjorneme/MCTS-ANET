@@ -1,5 +1,5 @@
 {
-    "mode": "Play",
+    "mode": "Topp",
     "plot_learning": true,
     "game": {
         "type_of_game": "Hex",
@@ -8,24 +8,28 @@
     "training": {
         "model_path": null,
         "optimizer_path": null,
-        "mcts_searches": 2500,
+        "mcts_searches": 250,
         "c": 1.41,
         "learning_rate": 0.001,
-        "optimizer": "Adam",
-        "batch_size": 256,
+        "optimizer": "RMSProp",
+        "batch_size": 128,
         "num_episodes": 100,
         "e_greedy_mcts": 0.5
     },
     "topp": {
         "model_paths": [
+            "Random",
+            "model_0.pth",
+            "model_25.pth",
             "model_50.pth",
-            "models/model_Hex_4_3.pth"
+            "model_75.pth",
+            "model_100.pth"
         ],
-        "num_games": 20,
+        "num_games": 10,
         "num_anet_cached": 5
     },
     "playgame": {
         "start": false,
-        "model_path": "models/model_Hex_4_3.pth"
+        "model_path": "model_25.pth"
     }
 }

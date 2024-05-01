@@ -4,16 +4,13 @@
       {"type": "Linear", "input": 48, "output": 128},
       {"type": "BatchNorm1d", "num_features": 128},
       {"type": "ReLU"},
-      {"type": "Linear", "input": 128, "output": 256},
-      {"type": "BatchNorm1d", "num_features": 256},
-      {"type": "ReLU"},
-      {"type": "Linear", "input": 256, "output": 128},
-      {"type": "BatchNorm1d", "num_features": 128},
-      {"type": "ReLU"},
       {"type": "Linear", "input": 128, "output": 128},
       {"type": "BatchNorm1d", "num_features": 128},
       {"type": "ReLU"},
-      {"type": "Linear", "input": 128, "output": 16}
+      {"type": "Linear", "input": 128, "output": 64},
+      {"type": "BatchNorm1d", "num_features": 64},
+      {"type": "ReLU"},
+      {"type": "Linear", "input": 64, "output": 16}
     ]
   }
   

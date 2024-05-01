@@ -52,6 +52,7 @@ class MCTSSystem:
 
         # Play until game is over
         while not state_manager.is_game_over():
+            state_manager.display_board()
 
             # Execute the MCTS search. Get probabilities for possible actions
             action_probs = mcts.run_simulation(self.mcts_searches)
@@ -60,8 +61,6 @@ class MCTSSystem:
 
             # Select the best action based on the action probabilities
             best_action = np.argmax(action_probs)
-
-            print(best_action)
 
             # Save to a buffer, before loading into replay buffer
             self.replay_buffer.push_to_buffer(board_state, action_probs, player)
@@ -80,6 +79,7 @@ class MCTSSystem:
             self.draw += 1
         else:
             self.loss += 1
+        state_manager.display_board()
         print(f"Episode {episode}")
 
     def run_system(self):
@@ -115,12 +115,10 @@ class MCTSSystem:
 
         # Forward pass
         predicted_probs = self.anet(input)
-        print(predicted_probs[0])
-        print(action_probs[0])
 
         # Calculate loss
         loss = self.loss_function(predicted_probs, torch.Tensor(action_probs))
-        self.loss_history.append(loss)
+        self.loss_history.append(loss.detach().numpy())
 
         # Backward pass and optimize
         loss.backward()

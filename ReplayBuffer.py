@@ -1,6 +1,5 @@
 import random
 
-
 # Replaybuffer: store samples from self play
 class ReplayBuffer:
     def __init__(self, max_size = 10000):

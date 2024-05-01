@@ -44,7 +44,7 @@ class MCTSNode:
         # Simulate until the game reaches a end state
         while not simulation_state.is_game_over():
 
-            # 30 % chance for taking a random action
+            # e_greedy decides the chance for taking a random action
             if random.random() < self.e_greedy_mcts:
                 possible_moves = simulation_state.get_valid_moves()
                 move = random.choice(possible_moves)

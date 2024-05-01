@@ -1,0 +1,24 @@
+{
+  "type_network": "CNN",
+  "layers": [
+    {"type": "Conv2d", "input": 3, "output": 64, "kernel": 3, "stride": 1, "padding": 1},
+    {"type": "BatchNorm2d", "num_features": 64},
+    {"type": "ReLU"},
+    {"type": "Conv2d", "input": 64, "output": 64, "kernel": 3, "stride": 1, "padding": 1},
+    {"type": "ReLU"},
+    {"type": "MaxPool2d", "kernel": 2, "stride": 2},
+
+    {"type": "Conv2d", "input": 64, "output": 128, "kernel": 3, "stride": 1, "padding": 1},
+    {"type": "BatchNorm2d", "num_features": 128},
+    {"type": "ReLU"},
+    {"type": "Conv2d", "input": 128, "output": 128, "kernel": 3, "stride": 1, "padding": 1},
+    {"type": "ReLU"},
+    {"type": "MaxPool2d", "kernel": 2, "stride": 2},
+
+    {"type": "Flatten"},
+    {"type": "Dropout", "p": 0.3},
+    {"type": "Linear", "input": 128, "output": 128},
+    {"type": "ReLU"},
+    {"type": "Linear", "input": 128, "output": 25}
+  ]
+}
