@@ -88,7 +88,7 @@ class Topp:
         predicted_probs = F.softmax(predicted_probs, dim=1) * torch.Tensor(valid_moves)
 
         # Choose top N probable actions. Used such that the model doesnt return the same result each time
-        if (sum(valid_moves) > 13):
+        if (sum(valid_moves) > (state_manager.board_size**2-state_manager.board_size)):
             N = min(3, sum(valid_moves))
             _, top_indexes = torch.topk(predicted_probs[0], N)
             action= random.choice(top_indexes.tolist())  
