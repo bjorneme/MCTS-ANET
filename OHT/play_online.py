@@ -6,12 +6,13 @@ from ANET.ANET import ANET
 actor = ANET(config_path="config/anet.json")
 
 # Import and override the `handle_get_action` hook in ActorClient
-from ActorClient import ActorClient
+from OHT.ActorClient import ActorClient
 
 # Import and override the `handle_get_action` hook in ActorClient
 class MyClient(ActorClient):
     def handle_get_action(self, state):
 
+        # Load the pretrained ANET
         actor.load_state_dict(torch.load("models/model_Hex_7.pth"))
 
         flat_board = np.array(state[1:])
@@ -26,13 +27,19 @@ class MyClient(ActorClient):
         # Replace 2 with -1
         matrix_2d[matrix_2d == 2] = -1
 
-
+        # Prepare input
         input = actor.prepare_input([matrix_2d], [state[0]])
+
+        # Forward pass
         predicted_probs = actor(input)
+
+        # Validate the move
         predicted_probs = F.softmax(predicted_probs, dim=1) * torch.Tensor(valid_moves)
 
+        # Select the move with highest probability
         move = int(torch.argmax(predicted_probs[0]))
 
+        # Calculate row and col
         row = move // 7
         col = move % 7
 
