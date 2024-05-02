@@ -7,8 +7,9 @@ from MCTS import MCTS, MCTSNode
 from ReplayBuffer import ReplayBuffer
 
 class MCTSSystem:
-    def __init__(self, anet, state_manager, board_size, total_actions, optimizer, num_games, batch_size, c, mcts_searches, e_greedy_mcts, num_anet_cached, model_path=None, optimizer_path=None):
+    def __init__(self, verbose, anet, state_manager, board_size, total_actions, optimizer, num_games, batch_size, c, mcts_searches, e_greedy_mcts, num_anet_cached, model_path=None, optimizer_path=None):
         # The game
+        self.verbose = verbose
         self.state_manager = state_manager
         self.board_size = board_size
         self.total_actions = total_actions
@@ -52,7 +53,8 @@ class MCTSSystem:
 
         # Play until game is over
         while not state_manager.is_game_over():
-            state_manager.display_board()
+            if self.verbose:
+                state_manager.display_board()
 
             # Execute the MCTS search. Get probabilities for possible actions
             action_probs = mcts.run_simulation(self.mcts_searches)
@@ -79,7 +81,8 @@ class MCTSSystem:
             self.draw += 1
         else:
             self.loss += 1
-        state_manager.display_board()
+        if self.verbose:
+            state_manager.display_board()
         print(f"Episode {episode}")
 
     def run_system(self):
@@ -91,11 +94,12 @@ class MCTSSystem:
             self.self_play(ga)
 
             # Step 2: Train ANET on random minibatches of cases from Replay buffer
-            if len(self.replay_buffer.buffer) >= self.batch_size:
+            if len(self.replay_buffer.buffer) >= self.batch_size and ga != 0:
                 self.train()
 
             # Step 3: Save the model
-            if ga % (self.num_games/int(self.num_anet_cached-1)) == 0:
+            save_intervall = self.num_games/int(self.num_anet_cached-1)
+            if ga % (save_intervall) == 0:
                 self.save_model(ga)
 
 
@@ -125,7 +129,8 @@ class MCTSSystem:
         self.optimizer.step()
 
         # Print loss
-        print(f"Loss: {loss}")
+        if self.verbose:
+            print(f"Loss: {loss}")
 
     def save_model(self, model_index):
         # Save the model.

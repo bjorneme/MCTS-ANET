@@ -8,7 +8,7 @@ class Hex:
     def __init__(self, board_size):
         # Initialize the board and starting player
         self.board_size = board_size
-        self.board = np.zeros((board_size, board_size), dtype=int)
+        self.board = self.get_initial_board()
         self.current_player = 1
 
         # Initialize DisjointSet and top and bottom virtual nodes
@@ -18,6 +18,9 @@ class Hex:
 
         # Directions it is allowed to connect
         self.directions = [(1,0), (1,-1), (0,-1), (-1,0), (-1,1), (0,1)]
+
+    def get_initial_board(self):
+        return np.zeros((self.board_size, self.board_size), dtype=int)
 
     def pos_to_index(self, row, col):
         # Convert [row, col] to index

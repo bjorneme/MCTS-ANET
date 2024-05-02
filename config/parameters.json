@@ -1,5 +1,6 @@
 {
-    "mode": "Topp",
+    "mode": "Training",
+    "verbose": true,
     "plot_learning": true,
     "game": {
         "type_of_game": "Hex",

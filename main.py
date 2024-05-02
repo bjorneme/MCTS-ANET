@@ -53,7 +53,8 @@ def main():
 
         # Initalize the system class
         mcts = MCTSSystem(
-            anet,
+            verbose=config['verbose'],
+            anet=anet,
             state_manager=game,
             board_size=board_size,
             total_actions=total_actions,
