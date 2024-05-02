@@ -52,22 +52,27 @@ class TicTacToe:
         return [1 if cell == 0 else 0 for row in self.board for cell in row]
 
     def check_win(self):
-        # Check rows, columns, and diagonals for a win
+        # Check rows, columns, and diagonals to determine if there is a win
         for i in range(self.board_size):
-            if abs(sum(self.board[i, :])) == self.board_size:
+            # Check rows
+            if sum(self.board[i, :]) == self.board_size or sum(self.board[i, :]) == -self.board_size:
                 return self.board[i, 0]
-            if abs(sum(self.board[:, i])) == self.board_size:
+            # Check columns
+            if sum(self.board[:, i]) == self.board_size or sum(self.board[:, i]) == -self.board_size:
                 return self.board[0, i]
         
-        # Check diagonals
-        if abs(sum(self.board.diagonal())) == self.board_size:
+        # Check main diagonal
+        if sum(self.board.diagonal()) == self.board_size or sum(self.board.diagonal()) == -self.board_size:
             return self.board[0, 0]
-        if abs(sum(np.fliplr(self.board).diagonal())) == self.board_size:
+        # Check anti-diagonal
+        if sum(np.fliplr(self.board).diagonal()) == self.board_size or sum(np.fliplr(self.board).diagonal()) == -self.board_size:
             return self.board[0, self.board_size-1]
         
         return 0
+
     
     def is_game_over(self):
+        # Check if game is over
         return self.check_win() != 0 or not self.get_valid_moves()
 
     
@@ -78,6 +83,8 @@ class TicTacToe:
         # Loop through each row in the board
         for row in self.board:
             print(" ".join(symbols[val] for val in row))
+
+        print()
 
     def copy(self):
         # Create a deep copy of the game state
@@ -97,4 +104,5 @@ class TicTacToe:
             return 0
         
     def reset(self):
+        # Reset the TicTacToe board
         return TicTacToe()
